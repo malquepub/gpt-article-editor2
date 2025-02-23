@@ -10,7 +10,7 @@ from datetime import datetime
 # -------------------
 # CONFIGURAÇÃO OPENAI
 # -------------------
-API_KEY = "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"
+API_KEY = "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"
 openai.api_key = API_KEY
 
 # -------------------
