@@ -14,7 +14,7 @@ API_KEY = "sk-proj-kt9Q0xOxprYVzH7A5ggRG8lMsiT3wkOv6xdXn32RlMUFvxZcfM_QverhSooDT
 openai.api_key = API_KEY
 
 # -------------------
-# FUNÇÃO PARA REVISAR TEXTO COM O GPT (API ATUALIZADA)
+# FUNÇÃO PARA REVISAR TEXTO COM O GPT (USANDO A NOVA API OPENAI)
 # -------------------
 def review_text_with_gpt(text):
     prompt = (
@@ -23,7 +23,9 @@ def review_text_with_gpt(text):
         f"{text}"
     )
 
-    response = openai.ChatCompletion.create(
+    client = openai.Client(api_key=API_KEY)
+
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are an expert academic editor."},
@@ -33,7 +35,7 @@ def review_text_with_gpt(text):
         max_tokens=1500,
     )
 
-    return response['choices'][0]['message']['content'].strip()
+    return response.choices[0].message.content.strip()
 
 # -------------------
 # FUNÇÃO PARA ADICIONAR ALTERAÇÕES (TRACK CHANGES SIMULADO)
@@ -80,7 +82,7 @@ def process_word_document(uploaded_file):
 # -------------------
 # INTERFACE STREAMLIT
 # -------------------
-st.title("📄 MalquePub Editing Services")
+st.title("📄 MalquePub Editing Services - Track Changes")
 
 st.write("""
 Upload a Word document (.docx) and receive a version with grammar and academic style improvements. 
