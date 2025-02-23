@@ -14,7 +14,7 @@ API_KEY = "sk-proj-kt9Q0xOxprYVzH7A5ggRG8lMsiT3wkOv6xdXn32RlMUFvxZcfM_QverhSooDT
 openai.api_key = API_KEY
 
 # -------------------
-# FUNÇÃO PARA REVISAR TEXTO COM O GPT
+# FUNÇÃO PARA REVISAR TEXTO COM O GPT (API ATUALIZADA)
 # -------------------
 def review_text_with_gpt(text):
     prompt = (
@@ -22,9 +22,9 @@ def review_text_with_gpt(text):
         "Do not add comments or explanations—just return the improved text.\n\n"
         f"{text}"
     )
-    
+
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
             {"role": "system", "content": "You are an expert academic editor."},
             {"role": "user", "content": prompt}
@@ -33,13 +33,13 @@ def review_text_with_gpt(text):
         max_tokens=1500,
     )
 
-    return response.choices[0].message['content'].strip()
+    return response['choices'][0]['message']['content'].strip()
 
 # -------------------
-# FUNÇÃO PARA ADICIONAR ALTERAÇÕES (TRACK CHANGES)
+# FUNÇÃO PARA ADICIONAR ALTERAÇÕES (TRACK CHANGES SIMULADO)
 # -------------------
 def apply_track_changes(original_text, revised_text):
-    diff = list(difflib.ndiff(original_text.split(), revised_text.split()))
+    diff = difflib.ndiff(original_text.split(), revised_text.split())
     tracked_text = ""
 
     for word in diff:
@@ -60,7 +60,7 @@ def process_word_document(uploaded_file):
         shutil.copyfileobj(uploaded_file, temp_input)
 
     doc = Document(temp_input.name)
-    
+
     for para in doc.paragraphs:
         original_text = para.text.strip()
         if original_text:
@@ -68,7 +68,8 @@ def process_word_document(uploaded_file):
             tracked_text = apply_track_changes(original_text, revised_text)
 
             # Substitui o texto original pelo texto com alterações
-            para.text = tracked_text
+            para.clear()
+            para.add_run(tracked_text)
 
     # Salva o documento revisado
     output_path = tempfile.NamedTemporaryFile(delete=False, suffix="_tracked.docx").name
@@ -79,7 +80,7 @@ def process_word_document(uploaded_file):
 # -------------------
 # INTERFACE STREAMLIT
 # -------------------
-st.title("📄 MalquePub Editing Services - Track Changes")
+st.title("📄 MalquePub Editing Services")
 
 st.write("""
 Upload a Word document (.docx) and receive a version with grammar and academic style improvements. 
@@ -90,14 +91,16 @@ uploaded_file = st.file_uploader("Upload your Word document:", type=["docx"])
 
 if uploaded_file and st.button("🚀 Process Document"):
     with st.spinner("Processing... Please wait."):
-        output_path = process_word_document(uploaded_file)
-        
-        st.success("✅ Document processed successfully!")
-        
-        with open(output_path, "rb") as file:
-            st.download_button(
-                label="⬇️ Download Revised Document",
-                data=file,
-                file_name=f"revised_with_track_changes_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
+        try:
+            output_path = process_word_document(uploaded_file)
+            st.success("✅ Document processed successfully!")
+
+            with open(output_path, "rb") as file:
+                st.download_button(
+                    label="⬇️ Download Revised Document",
+                    data=file,
+                    file_name=f"revised_with_track_changes_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                )
+        except Exception as e:
+            st.error(f"❌ An error occurred: {str(e)}")
