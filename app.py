@@ -8,13 +8,15 @@ import difflib
 from datetime import datetime
 
 # -------------------
-# CONFIGURAÇÃO OPENAI
+# CONFIGURAÇÃO OPENAI (API ATUALIZADA)
 # -------------------
-API_KEY = "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"
+# Recomenda-se armazenar a chave de API em uma variável de ambiente para maior segurança.
+
+API_KEY = st.secrets["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"]  # A chave deve ser configurada no Streamlit Cloud em "Secrets Management"
 openai.api_key = API_KEY
 
 # -------------------
-# FUNÇÃO PARA REVISAR TEXTO COM O GPT (USANDO A NOVA API OPENAI)
+# FUNÇÃO PARA REVISAR TEXTO COM O GPT (VERSÃO ATUALIZADA DA API)
 # -------------------
 def review_text_with_gpt(text):
     prompt = (
@@ -23,9 +25,7 @@ def review_text_with_gpt(text):
         f"{text}"
     )
 
-    client = openai.Client(api_key=API_KEY)
-
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are an expert academic editor."},
@@ -35,7 +35,7 @@ def review_text_with_gpt(text):
         max_tokens=1500,
     )
 
-    return response.choices[0].message.content.strip()
+    return response.choices[0].message['content'].strip()
 
 # -------------------
 # FUNÇÃO PARA ADICIONAR ALTERAÇÕES (TRACK CHANGES SIMULADO)
